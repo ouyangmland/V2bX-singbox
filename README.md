@@ -47,7 +47,7 @@ A V2board node server based on Sing-box, modified from XrayR.
 ### 脚本安装
 
 ```
-wget -N https://raw.githubusercontent.com/MoeclubM/master/install.sh && bash install.sh
+wget -N https://raw.githubusercontent.com/MoeclubM/V2bX-Script/master/install.sh && bash install.sh
 ```
 
 ### 手动安装
