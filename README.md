@@ -4,15 +4,15 @@
 [![](https://img.shields.io/badge/TgChat-YuzukiProjects%E4%BA%A4%E6%B5%81%E7%BE%A4-blue)](https://t.me/YuzukiProjects)
 
 A V2board node server based on Sing-box, modified from XrayR.  
-一个基于Sing-box内核的V2board节点服务端，修改自XrayR，支持V2ay,Trojan,Shadowsocks协议。
+一个基于Sing-box内核的V2board节点服务端，修改自XrayR，支持Vmess,Vless,Trojan,Shadowsocks,Hysteria,AnyTLS等协议。
 
-**注意： 本项目需要搭配[修改版V2board](https://github.com/wyx2685/v2board)**
+**注意： 本项目需要搭配[修改版V2board](https://github.com/wyx2685/v2board)或[Xboard](https://github.com/cedar2025/Xboard)**
 
 ## 特点
 
 * 永久开源且免费。
-* 支持Vmess/Vless, Trojan， Shadowsocks, Hysteria1/2多种协议。
-* 支持Vless和XTLS等新特性。
+* 支持多种协议。
+* 支持Vless和XTLS/AnyTLS等新特性。
 * 支持单实例对接多节点，无需重复启动。
 * 支持限制在线IP。
 * 支持限制Tcp连接数。
@@ -24,30 +24,30 @@ A V2board node server based on Sing-box, modified from XrayR.
 
 ## 功能介绍
 
-| 功能        | v2ray | trojan | shadowsocks | hysteria1/2 |
-|-----------|-------|--------|-------------|----------|
-| 自动申请tls证书 | √     | √      | √           | √        |
-| 自动续签tls证书 | √     | √      | √           | √        |
-| 在线人数统计    | √     | √      | √           | √        |
-| 审计规则      | √     | √      | √           | √         |
-| 自定义DNS    | √     | √      | √           | √        |
-| 在线IP数限制   | √     | √      | √           | √        |
-| 连接数限制     | √     | √      | √           | √         |
-| 跨节点IP数限制  |√      |√       |√            |√          |
-| 按照用户限速    | √     | √      | √           | √         |
-| 动态限速(未测试) | √     | √      | √           | √         |
+| 功能特性 | Vmess | Vless | Trojan | Shadowsocks | Hysteria | AnyTLS |
+| :--- | :---: | :---: | :---: | :---: | :---: | :---: |
+| 自动申请 TLS | √ | √ | √ | √ | √ | √ |
+| 自动续签 TLS | √ | √ | √ | √ | √ | √ |
+| 在线人数统计 | √ | √ | √ | √ | √ | √ |
+| 审计规则 | √ | √ | √ | √ | √ | √ |
+| 自定义 DNS | √ | √ | √ | √ | √ | √ |
+| 在线 IP 限制 | √ | √ | √ | √ | √ | √ |
+| 连接数限制 | √ | √ | √ | √ | √ | √ |
+| 跨节点 IP 限制 | √ | √ | √ | √ | √ | √ |
+| 用户限速 | √ | √ | √ | √ | √ | X |
+| 动态限速 | √ | √ | √ | √ | √ | X |
 
 ## TODO
 
-- [ ] 重新实现动态限速
-- [ ] 完善使用文档
+- 实现动态限速
+- 使用文档
 
 ## 软件安装
 
-### 一键安装
+### 脚本安装
 
 ```
-wget -N https://raw.githubusercontent.com/wyx2685/V2bX-script/master/install.sh && bash install.sh
+wget -N https://raw.githubusercontent.com/MoeclubM/master/install.sh && bash install.sh
 ```
 
 ### 手动安装
@@ -57,33 +57,24 @@ wget -N https://raw.githubusercontent.com/wyx2685/V2bX-script/master/install.sh 
 ## 构建
 ``` bash
 # 通过-tags选项指定要编译的内核， 可选 xray， sing, hysteria2
-GOEXPERIMENT=jsonv2 go build -v -o build_assets/V2bX -tags "sing with_quic with_grpc with_utls with_wireguard with_acme with_gvisor" -trimpath -ldflags "-X 'github.com/InazumaV/V2bX/cmd.version=$version' -s -w -buildid="
+GOEXPERIMENT=jsonv2 go build -v -o build_assets/V2bX -tags "sing with_quic with_grpc with_utls with_wireguard with_acme with_gvisor" -trimpath -ldflags "-X 'github.com/MoeclubM/V2bX/cmd.version=$version' -s -w -buildid="
 ```
-
+构建时请使用 GO 1.25以上版本，生成文件会存放在 build_assets 目录下
 ## 配置文件及详细使用教程
 
 [详细使用教程](https://v2bx.v-50.me/)
 
 ## 免责声明
 
-* 此项目用于本人自用，因此本人不能保证向后兼容性。
-* 由于本人能力有限，不能保证所有功能的可用性，如果出现问题请在Issues反馈。
-* 本人不对任何人使用本项目造成的任何后果承担责任。
-* 本人比较多变，因此本项目可能会随想法或思路的变动随性更改项目结构或大规模重构代码，若不能接受请勿使用。
-
-## 赞助
-
-[赞助链接](https://v-50.me/)
+* 开源免费项目，不保证功能完美，出现问题请在Issues反馈。
+* 不对任何人使用本项目造成的任何后果承担责任。
+* 本项目可能会随想法或思路的变动随性更改项目结构或大规模重构代码，若不能接受请勿使用。
 
 ## Thanks
 
-* [Project X](https://github.com/XTLS/)
 * [V2Fly](https://github.com/v2fly)
 * [VNet-V2ray](https://github.com/ProxyPanel/VNet-V2ray)
 * [Air-Universe](https://github.com/crossfw/Air-Universe)
 * [XrayR](https://github.com/XrayR/XrayR)
 * [sing-box](https://github.com/SagerNet/sing-box)
-
-## Stars 增长记录
-
-[![Stargazers over time](https://starchart.cc/wyx2685/V2bX.svg)](https://starchart.cc/wyx2685/V2bX)
+* [wyx2685/V2bX](https://github.com/wyx2685/V2bX)

@@ -95,8 +95,8 @@ github.com/DataDog/datadog-go v3.2.0+incompatible/go.mod h1:LButxg5PwREeZtORoXG3
 github.com/HdrHistogram/hdrhistogram-go v1.1.0/go.mod h1:yDgFjdqOqDEKOvasDdhWNXYg9BVp4O+o5f6V/ehm6Oo=
 github.com/HdrHistogram/hdrhistogram-go v1.1.2/go.mod h1:yDgFjdqOqDEKOvasDdhWNXYg9BVp4O+o5f6V/ehm6Oo=
 github.com/Knetic/govaluate v3.0.1-0.20171022003610-9aa49832a739+incompatible/go.mod h1:r7JcOSlj0wfOMncg0iLm8Leh48TZaKVeNIfJntJ2wa0=
-github.com/MoeclubM/sing-box_mod v0.0.0-20251209165805-d8d72746a501 h1:ro9MCoa6mC8kkZoKwmuI0zt7L/XMgxS4YhM69maB+Nk=
-github.com/MoeclubM/sing-box_mod v0.0.0-20251209165805-d8d72746a501/go.mod h1:l7Lilbku0z0Sa4AyqelhlsX+tVOGhO6IQfsxa6gaeXw=
+github.com/MoeclubM/sing-box_mod v0.0.0-20251210103749-4e1c9855bb51 h1:LfHXzRFBLR7PY+8RZKRbkWLb+6jc9U2eWGEh6dRx8KY=
+github.com/MoeclubM/sing-box_mod v0.0.0-20251210103749-4e1c9855bb51/go.mod h1:l7Lilbku0z0Sa4AyqelhlsX+tVOGhO6IQfsxa6gaeXw=
 github.com/OneOfOne/xxhash v1.2.2/go.mod h1:HSdplMjZKSmBqAxg5vPj2TmRDmfkzw+cTzAElWljhcU=
 github.com/OpenDNS/vegadns2client v0.0.0-20180418235048-a3fa4a771d87 h1:xPMsUicZ3iosVPSIP7bW5EcGUzjiiMl1OYTe14y/R24=
 github.com/OpenDNS/vegadns2client v0.0.0-20180418235048-a3fa4a771d87/go.mod h1:iGLljf5n9GjT6kc0HBvyI1nOKnGQbNB66VzSNbK5iks=

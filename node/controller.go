@@ -4,11 +4,11 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/InazumaV/V2bX/api/panel"
-	"github.com/InazumaV/V2bX/common/task"
-	"github.com/InazumaV/V2bX/conf"
-	vCore "github.com/InazumaV/V2bX/core"
-	"github.com/InazumaV/V2bX/limiter"
+	"github.com/MoeclubM/V2bX/api/panel"
+	"github.com/MoeclubM/V2bX/common/task"
+	"github.com/MoeclubM/V2bX/conf"
+	vCore "github.com/MoeclubM/V2bX/core"
+	"github.com/MoeclubM/V2bX/limiter"
 	log "github.com/sirupsen/logrus"
 )
 

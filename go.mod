@@ -1,4 +1,4 @@
-module github.com/InazumaV/V2bX
+module github.com/MoeclubM/V2bX
 
 go 1.25
 
@@ -330,4 +330,4 @@ require (
 	lukechampine.com/blake3 v1.4.1 // indirect
 )
 
-replace github.com/sagernet/sing-box => github.com/MoeclubM/sing-box_mod v0.0.0-20251209165805-d8d72746a501
+replace github.com/sagernet/sing-box => github.com/MoeclubM/sing-box_mod v0.0.0-20251210103749-4e1c9855bb51

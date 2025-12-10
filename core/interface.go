@@ -1,8 +1,8 @@
 package core
 
 import (
-	"github.com/InazumaV/V2bX/api/panel"
-	"github.com/InazumaV/V2bX/conf"
+	"github.com/MoeclubM/V2bX/api/panel"
+	"github.com/MoeclubM/V2bX/conf"
 )
 
 type AddUsersParams struct {

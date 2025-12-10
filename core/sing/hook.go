@@ -6,12 +6,12 @@ import (
 	"net"
 	"sync"
 
-	"github.com/InazumaV/V2bX/common/format"
-	"github.com/InazumaV/V2bX/common/rate"
+	"github.com/MoeclubM/V2bX/common/format"
+	"github.com/MoeclubM/V2bX/common/rate"
 
-	"github.com/InazumaV/V2bX/limiter"
+	"github.com/MoeclubM/V2bX/limiter"
 
-	"github.com/InazumaV/V2bX/common/counter"
+	"github.com/MoeclubM/V2bX/common/counter"
 	"github.com/sagernet/sing-box/adapter"
 	"github.com/sagernet/sing-box/log"
 	N "github.com/sagernet/sing/common/network"
@@ -39,7 +39,7 @@ func (h *HookServer) RoutedConnection(_ context.Context, conn net.Conn, m adapte
 		conn.Close()
 		log.Error("[", m.Inbound, "] ", "Limited ", m.User, " by ip or conn")
 		return conn
-	} else if b != nil {
+	} else if b != nil && m.InboundType != "anytls" {
 		conn = rate.NewConnRateLimiter(conn, b)
 	}
 	if l != nil {

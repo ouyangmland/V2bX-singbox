@@ -6,10 +6,10 @@ import (
 	"runtime"
 	"syscall"
 
-	"github.com/InazumaV/V2bX/conf"
-	vCore "github.com/InazumaV/V2bX/core"
-	"github.com/InazumaV/V2bX/limiter"
-	"github.com/InazumaV/V2bX/node"
+	"github.com/MoeclubM/V2bX/conf"
+	vCore "github.com/MoeclubM/V2bX/core"
+	"github.com/MoeclubM/V2bX/limiter"
+	"github.com/MoeclubM/V2bX/node"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 )
