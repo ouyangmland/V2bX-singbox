@@ -3,8 +3,8 @@
 [![](https://img.shields.io/badge/TgChat-UnOfficialV2Board%E4%BA%A4%E6%B5%81%E7%BE%A4-green)](https://t.me/unofficialV2board)
 [![](https://img.shields.io/badge/TgChat-YuzukiProjects%E4%BA%A4%E6%B5%81%E7%BE%A4-blue)](https://t.me/YuzukiProjects)
 
-A V2board node server based on multi core, modified from XrayR.  
-一个基于多种内核的V2board节点服务端，修改自XrayR，支持V2ay,Trojan,Shadowsocks协议。
+A V2board node server based on Sing-box, modified from XrayR.  
+一个基于Sing-box内核的V2board节点服务端，修改自XrayR，支持V2ay,Trojan,Shadowsocks协议。
 
 **注意： 本项目需要搭配[修改版V2board](https://github.com/wyx2685/v2board)**
 
@@ -19,8 +19,8 @@ A V2board node server based on multi core, modified from XrayR.
 * 支持节点端口级别、用户级别限速。
 * 配置简单明了。
 * 修改配置自动重启实例。
-* 支持多种内核，易扩展。
-* 支持条件编译，可仅编译需要的内核。
+* 基于Sing-box内核。
+* 支持条件编译。
 
 ## 功能介绍
 
@@ -57,7 +57,7 @@ wget -N https://raw.githubusercontent.com/wyx2685/V2bX-script/master/install.sh 
 ## 构建
 ``` bash
 # 通过-tags选项指定要编译的内核， 可选 xray， sing, hysteria2
-GOEXPERIMENT=jsonv2 go build -v -o build_assets/V2bX -tags "sing xray hysteria2 with_quic with_grpc with_utls with_wireguard with_acme with_gvisor" -trimpath -ldflags "-X 'github.com/InazumaV/V2bX/cmd.version=$version' -s -w -buildid="
+GOEXPERIMENT=jsonv2 go build -v -o build_assets/V2bX -tags "sing with_quic with_grpc with_utls with_wireguard with_acme with_gvisor" -trimpath -ldflags "-X 'github.com/InazumaV/V2bX/cmd.version=$version' -s -w -buildid="
 ```
 
 ## 配置文件及详细使用教程
