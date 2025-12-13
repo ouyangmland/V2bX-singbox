@@ -40,7 +40,7 @@ type UserMap struct {
 }
 
 func init() {
-	vCore.RegisterCore("sing", New)
+	vCore.RegisterCore(New)
 }
 
 func New(c *conf.CoreConfig) (vCore.Core, error) {

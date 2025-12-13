@@ -39,8 +39,12 @@ func (h *HookServer) RoutedConnection(_ context.Context, conn net.Conn, m adapte
 		conn.Close()
 		log.Error("[", m.Inbound, "] ", "Limited ", m.User, " by ip or conn")
 		return conn
-	} else if b != nil && m.InboundType != "anytls" {
-		conn = rate.NewConnRateLimiter(conn, b)
+	} else if b != nil {
+		if m.InboundType == "anytls" {
+			conn = rate.NewMuxConnRateLimiter(conn, b)
+		} else {
+			conn = rate.NewConnRateLimiter(conn, b)
+		}
 	}
 	if l != nil {
 		destStr := m.Destination.AddrString()

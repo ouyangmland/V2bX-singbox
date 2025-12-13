@@ -106,14 +106,11 @@ func (n *NodeConfig) UnmarshalJSON(data []byte) (err error) {
 
 type Options struct {
 	Name                   string          `json:"Name"`
-	Core                   string          `json:"Core"`
-	CoreName               string          `json:"CoreName"`
 	ListenIP               string          `json:"ListenIP"`
 	SendIP                 string          `json:"SendIP"`
 	DeviceOnlineMinTraffic int64           `json:"DeviceOnlineMinTraffic"`
 	ReportMinTraffic       int64           `json:"ReportMinTraffic"`
 	LimitConfig            LimitConfig     `json:"LimitConfig"`
-	RawOptions             json.RawMessage `json:"RawOptions"`
 	SingOptions            *SingOptions    `json:"SingOptions"`
 	CertConfig             *CertConfig     `json:"CertConfig"`
 }
@@ -124,13 +121,6 @@ func (o *Options) UnmarshalJSON(data []byte) error {
 	if err != nil {
 		return err
 	}
-	switch o.Core {
-	case "sing":
-		o.SingOptions = NewSingOptions()
-		return json.Unmarshal(data, o.SingOptions)
-	default:
-		o.Core = ""
-		o.RawOptions = data
-	}
-	return nil
+	o.SingOptions = NewSingOptions()
+	return json.Unmarshal(data, o.SingOptions)
 }

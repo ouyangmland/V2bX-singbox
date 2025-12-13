@@ -5,22 +5,16 @@ import (
 )
 
 type CoreConfig struct {
-	Type            string           `json:"Type"`
-	Name            string           `json:"Name"`
-	SingConfig      *SingConfig      `json:"-"`
+	Name       string      `json:"Name"`
+	SingConfig *SingConfig `json:"-"`
 }
 
-type _CoreConfig CoreConfig
-
 func (c *CoreConfig) UnmarshalJSON(b []byte) error {
+	type _CoreConfig CoreConfig
 	err := json.Unmarshal(b, (*_CoreConfig)(c))
 	if err != nil {
 		return err
 	}
-	switch c.Type {
-	case "sing":
-		c.SingConfig = NewSingConfig()
-		return json.Unmarshal(b, c.SingConfig)
-	}
-	return nil
+	c.SingConfig = NewSingConfig()
+	return json.Unmarshal(b, c.SingConfig)
 }
