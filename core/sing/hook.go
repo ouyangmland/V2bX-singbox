@@ -41,7 +41,7 @@ func (h *HookServer) RoutedConnection(_ context.Context, conn net.Conn, m adapte
 		return conn
 	} else if b != nil {
 		if m.InboundType == "anytls" {
-			conn = rate.NewMuxConnRateLimiter(conn, b)
+			//conn = rate.NewMuxConnRateLimiter(conn, b)
 		} else {
 			conn = rate.NewConnRateLimiter(conn, b)
 		}
