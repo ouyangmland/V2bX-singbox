@@ -56,7 +56,7 @@ wget -N https://raw.githubusercontent.com/MoeclubM/V2bX-Script/master/install.sh
 
 ## 构建
 ``` bash
-# 通过-tags选项指定要编译的内核， 可选 xray， sing, hysteria2
+# 通过 -tags 启用 sing-box_mod 的可选功能（如 QUIC/GRPC/uTLS/WireGuard/ACME/gVisor 等）
 GOEXPERIMENT=jsonv2 go build -v -o build_assets/V2bX -tags "sing with_quic with_grpc with_utls with_wireguard with_acme with_gvisor" -trimpath -ldflags "-X 'github.com/MoeclubM/V2bX/cmd.version=$version' -s -w -buildid="
 ```
 构建时请使用 GO 1.25以上版本，生成文件会存放在 build_assets 目录下

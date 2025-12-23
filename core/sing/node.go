@@ -51,6 +51,11 @@ type HttpupgradeNetworkConfig struct {
 	Host string `json:"host"`
 }
 
+type H2NetworkConfig struct {
+	Host json.RawMessage `json:"host"`
+	Path string          `json:"path"`
+}
+
 func getInboundOptions(tag string, info *panel.NodeInfo, c *conf.Options) (option.Inbound, error) {
 	addr, err := netip.ParseAddr(c.ListenIP)
 	if err != nil {
@@ -206,6 +211,35 @@ func getInboundOptions(tag string, info *panel.NodeInfo, c *conf.Options) (optio
 				Path: network.Path,
 				Host: network.Host,
 			}
+		case "http", "h2":
+			t.Type = "http"
+			network := H2NetworkConfig{}
+			if len(n.NetworkSettings) != 0 {
+				err := json.Unmarshal(n.NetworkSettings, &network)
+				if err != nil {
+					return option.Inbound{}, fmt.Errorf("decode NetworkSettings error: %s", err)
+				}
+			}
+			var host badoption.Listable[string]
+			if len(network.Host) > 0 {
+				var singleHost string
+				if err := json.Unmarshal(network.Host, &singleHost); err == nil {
+					host = badoption.Listable[string]{singleHost}
+				} else {
+					var hostList []string
+					if err := json.Unmarshal(network.Host, &hostList); err == nil {
+						host = badoption.Listable[string](hostList)
+					} else {
+						return option.Inbound{}, fmt.Errorf("decode NetworkSettings host error: %s", err)
+					}
+				}
+			}
+			t.HTTPOptions = option.V2RayHTTPOptions{
+				Host: host,
+				Path: network.Path,
+			}
+		case "quic":
+			t.QUICOptions = option.V2RayQUICOptions{}
 		}
 		if info.Type == "vless" {
 			in.Type = "vless"
