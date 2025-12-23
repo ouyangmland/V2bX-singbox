@@ -34,6 +34,7 @@ type NodeInfo struct {
 	Trojan      *TrojanNode
 	Tuic        *TuicNode
 	AnyTls      *AnyTlsNode
+	Naive       *NaiveNode
 	Hysteria    *HysteriaNode
 	Hysteria2   *Hysteria2Node
 	Common      *CommonNode
@@ -121,6 +122,13 @@ type TuicNode struct {
 type AnyTlsNode struct {
 	CommonNode
 	PaddingScheme []string `json:"padding_scheme,omitempty"`
+}
+
+type NaiveNode struct {
+	CommonNode
+	Tls             int          `json:"tls"`
+	TlsSettings     TlsSettings  `json:"tls_settings"`
+	TlsSettingsBack *TlsSettings `json:"tlsSettings"`
 }
 
 type HysteriaNode struct {
@@ -262,6 +270,19 @@ func (c *Client) GetNodeInfo() (node *NodeInfo, err error) {
 		cm = &rsp.CommonNode
 		node.Hysteria2 = rsp
 		node.Security = Tls
+	case "naive":
+		rsp := &NaiveNode{}
+		err = json.Unmarshal(r.Body(), rsp)
+		if err != nil {
+			return nil, fmt.Errorf("decode naive params error: %s", err)
+		}
+		if rsp.TlsSettingsBack != nil {
+			rsp.TlsSettings = *rsp.TlsSettingsBack
+			rsp.TlsSettingsBack = nil
+		}
+		cm = &rsp.CommonNode
+		node.Naive = rsp
+		node.Security = rsp.Tls
 	}
 
 	// parse rules and dns

@@ -4,7 +4,7 @@
 [![](https://img.shields.io/badge/TgChat-YuzukiProjects%E4%BA%A4%E6%B5%81%E7%BE%A4-blue)](https://t.me/YuzukiProjects)
 
 A V2board node server based on Sing-box, modified from XrayR.  
-一个基于Sing-box内核的V2board节点服务端，修改自XrayR，支持Vmess,Vless,Trojan,Shadowsocks,Hysteria,AnyTLS等协议。
+一个基于Sing-box内核的V2board节点服务端，修改自XrayR，支持Vmess,Vless,Trojan,Shadowsocks,Hysteria,AnyTLS,Naive等协议。
 
 **注意： 本项目需要搭配[修改版V2board](https://github.com/wyx2685/v2board)或[Xboard](https://github.com/cedar2025/Xboard)**
 

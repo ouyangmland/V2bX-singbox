@@ -36,7 +36,7 @@ func New(c *conf.ApiConfig) (*Client, error) {
 		client = resty.NewWithLocalAddr(&net.TCPAddr{
 			IP: net.ParseIP(c.APISendIP),
 		})
-	} else {	
+	} else {
 		client = resty.New()
 	}
 	client.SetRetryCount(3)
@@ -63,6 +63,7 @@ func New(c *conf.ApiConfig) (*Client, error) {
 		"vmess",
 		"trojan",
 		"shadowsocks",
+		"naive",
 		"hysteria",
 		"hysteria2",
 		"tuic",

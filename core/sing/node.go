@@ -15,6 +15,7 @@ import (
 	"github.com/MoeclubM/V2bX/api/panel"
 	"github.com/MoeclubM/V2bX/conf"
 	"github.com/sagernet/sing-box/option"
+	"github.com/sagernet/sing/common/auth"
 	F "github.com/sagernet/sing/common/format"
 	"github.com/sagernet/sing/common/json/badoption"
 )
@@ -140,7 +141,7 @@ func getInboundOptions(tag string, info *panel.NodeInfo, c *conf.Options) (optio
 						if err != nil {
 							return option.Inbound{}, fmt.Errorf("decode HttpRequest error: %s", err)
 						}
-						t.HTTPOptions.Host = request.Headers.Host
+						t.HTTPOptions.Host = badoption.Listable[string](request.Headers.Host)
 						t.HTTPOptions.Path = request.Path[0]
 						t.HTTPOptions.Method = request.Method
 					}
@@ -335,6 +336,22 @@ func getInboundOptions(tag string, info *panel.NodeInfo, c *conf.Options) (optio
 			}
 		}
 		in.Options = trojanoption
+	case "naive":
+		in.Type = "naive"
+		usernameBytes := make([]byte, 16)
+		passwordBytes := make([]byte, 16)
+		_, _ = rand.Read(usernameBytes)
+		_, _ = rand.Read(passwordBytes)
+		in.Options = &option.NaiveInboundOptions{
+			ListenOptions: listen,
+			Users: []auth.User{{
+				Username: base64.RawURLEncoding.EncodeToString(usernameBytes),
+				Password: base64.RawURLEncoding.EncodeToString(passwordBytes),
+			}},
+			InboundTLSOptionsContainer: option.InboundTLSOptionsContainer{
+				TLS: &tls,
+			},
+		}
 	case "tuic":
 		in.Type = "tuic"
 		tls.ALPN = append(tls.ALPN, "h3")
