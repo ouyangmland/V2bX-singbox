@@ -5,7 +5,6 @@
   },
   "Cores": [
     {
-      "Type": "sing",
       "Log": {
         "Level": "info",
         "Timestamp": true
@@ -20,7 +19,6 @@
   ],
   "Nodes": [
     {
-      "Core": "sing",
       "ApiHost": "http://127.0.0.1",
       "ApiKey": "test",
       "NodeID": 33,

@@ -44,12 +44,18 @@ func init() {
 }
 
 func New(c *conf.CoreConfig) (vCore.Core, error) {
-	ctx := context.Background()
-	ctx = box.Context(ctx, include.InboundRegistry(), include.OutboundRegistry(), include.EndpointRegistry(), include.DNSTransportRegistry(), include.ServiceRegistry())
-	options := option.Options{}
-	if len(c.SingConfig.OriginalPath) != 0 {
-		data, err := os.ReadFile(c.SingConfig.OriginalPath)
-		if err != nil {
+	if c == nil {
+		return nil, fmt.Errorf("core config is nil")
+	}
+	if c.SingConfig == nil {
+		return nil, fmt.Errorf("SingConfig is nil (missing `Cores`/core config in config file?)")
+	}
+        ctx := context.Background()
+        ctx = box.Context(ctx, include.InboundRegistry(), include.OutboundRegistry(), include.EndpointRegistry(), include.DNSTransportRegistry(), include.ServiceRegistry())
+        options := option.Options{}
+        if len(c.SingConfig.OriginalPath) != 0 {
+                data, err := os.ReadFile(c.SingConfig.OriginalPath)
+                if err != nil {
 			return nil, fmt.Errorf("read original config error: %s", err)
 		}
 		options, err = json.UnmarshalExtendedContext[option.Options](ctx, data)
