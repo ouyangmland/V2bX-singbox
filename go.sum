@@ -99,6 +99,8 @@ github.com/MoeclubM/sing-box_mod v0.0.0-20260109120634-ffdbef288828 h1:nfJW+mIOK
 github.com/MoeclubM/sing-box_mod v0.0.0-20260109120634-ffdbef288828/go.mod h1:XAKKOHFaKyAOsiBIKlKa2zkwdASUJ2mE8SBDpA31v88=
 github.com/MoeclubM/sing-box_mod v1.13.1-beta.2-v2bx.1 h1:e/BpHmOxiarX0D+dG24WYKK6+dQz9Vd2/u4+DNwAoUY=
 github.com/MoeclubM/sing-box_mod v1.13.1-beta.2-v2bx.1/go.mod h1:v2+77TvmnHYXm88j+0YmwCGdUKc2+fHRt21w+2aa0GE=
+github.com/MoeclubM/sing-box_mod v1.13.1-beta.2-v2bx.2 h1:q9v00nL5XVhKXl8M8m3vjB5KwS7wm9q/YUyDdGWhJEY=
+github.com/MoeclubM/sing-box_mod v1.13.1-beta.2-v2bx.2/go.mod h1:v2+77TvmnHYXm88j+0YmwCGdUKc2+fHRt21w+2aa0GE=
 github.com/OneOfOne/xxhash v1.2.2/go.mod h1:HSdplMjZKSmBqAxg5vPj2TmRDmfkzw+cTzAElWljhcU=
 github.com/OpenDNS/vegadns2client v0.0.0-20180418235048-a3fa4a771d87 h1:xPMsUicZ3iosVPSIP7bW5EcGUzjiiMl1OYTe14y/R24=
 github.com/OpenDNS/vegadns2client v0.0.0-20180418235048-a3fa4a771d87/go.mod h1:iGLljf5n9GjT6kc0HBvyI1nOKnGQbNB66VzSNbK5iks=
