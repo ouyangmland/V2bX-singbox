@@ -1,6 +1,8 @@
 package conf
 
 import (
+	"encoding/json"
+
 	"github.com/sagernet/sing-box/option"
 )
 
@@ -39,6 +41,27 @@ type SingOptions struct {
 	DomainStrategy           option.DomainStrategy  `json:"DomainStrategy"`
 	FallBackConfigs          *FallBackConfigForSing `json:"FallBackConfigs"`
 	Multiplex                *MultiplexConfig       `json:"MultiplexConfig"`
+}
+
+func (o *SingOptions) UnmarshalJSON(data []byte) error {
+	type alias SingOptions
+	aux := struct {
+		*alias
+		LegacyTCPFastOpen *bool `json:"TCPFastOpen"`
+		LegacySniffEnable *bool `json:"SniffEnabled"`
+	}{
+		alias: (*alias)(o),
+	}
+	if err := json.Unmarshal(data, &aux); err != nil {
+		return err
+	}
+	if aux.LegacyTCPFastOpen != nil {
+		o.TCPFastOpen = *aux.LegacyTCPFastOpen
+	}
+	if aux.LegacySniffEnable != nil {
+		o.SniffEnabled = *aux.LegacySniffEnable
+	}
+	return nil
 }
 
 type SingNtpConfig struct {
