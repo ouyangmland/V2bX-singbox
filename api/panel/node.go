@@ -4,7 +4,6 @@ import (
 	"crypto/sha256"
 	"encoding/hex"
 	"fmt"
-	"reflect"
 	"strconv"
 	"strings"
 	"time"
@@ -165,6 +164,9 @@ func (c *Client) GetNodeInfo() (node *NodeInfo, err error) {
 		ForceContentType("application/json").
 		Get(path)
 
+	if err = c.checkResponse(r, path, err); err != nil {
+		return nil, err
+	}
 	if r.StatusCode() == 304 {
 		return nil, nil
 	}
@@ -175,17 +177,14 @@ func (c *Client) GetNodeInfo() (node *NodeInfo, err error) {
 	}
 	c.responseBodyHash = newBodyHash
 	c.nodeEtag = r.Header().Get("ETag")
-	if err = c.checkResponse(r, path, err); err != nil {
-		return nil, err
-	}
 
-	if r != nil {
-		defer func() {
-			if r.RawBody() != nil {
-				r.RawBody().Close()
-			}
-		}()
-	} else {
+	defer func() {
+		if r.RawBody() != nil {
+			r.RawBody().Close()
+		}
+	}()
+
+	if r == nil {
 		return nil, fmt.Errorf("received nil response")
 	}
 	node = &NodeInfo{
@@ -284,20 +283,18 @@ func (c *Client) GetNodeInfo() (node *NodeInfo, err error) {
 		node.Naive = rsp
 		node.Security = rsp.Tls
 	}
+	if cm == nil {
+		return nil, fmt.Errorf("decode node params error: missing common config")
+	}
 
 	// parse rules and dns
 	for i := range cm.Routes {
-		var matchs []string
-		if _, ok := cm.Routes[i].Match.(string); ok {
-			matchs = strings.Split(cm.Routes[i].Match.(string), ",")
-		} else if _, ok = cm.Routes[i].Match.([]string); ok {
-			matchs = cm.Routes[i].Match.([]string)
-		} else {
-			temp := cm.Routes[i].Match.([]interface{})
-			matchs = make([]string, len(temp))
-			for i := range temp {
-				matchs[i] = temp[i].(string)
-			}
+		matchs, parseErr := parseRouteMatch(cm.Routes[i].Match)
+		if parseErr != nil {
+			return nil, fmt.Errorf("decode route[%d] match error: %w", i, parseErr)
+		}
+		if len(matchs) == 0 {
+			continue
 		}
 		switch cm.Routes[i].Action {
 		case "block":
@@ -326,8 +323,10 @@ func (c *Client) GetNodeInfo() (node *NodeInfo, err error) {
 	}
 
 	// set interval
-	node.PushInterval = intervalToTime(cm.BaseConfig.PushInterval)
-	node.PullInterval = intervalToTime(cm.BaseConfig.PullInterval)
+	if cm.BaseConfig != nil {
+		node.PushInterval = intervalToTime(cm.BaseConfig.PushInterval)
+		node.PullInterval = intervalToTime(cm.BaseConfig.PullInterval)
+	}
 
 	node.Common = cm
 	// clear
@@ -337,16 +336,75 @@ func (c *Client) GetNodeInfo() (node *NodeInfo, err error) {
 	return node, nil
 }
 
-func intervalToTime(i interface{}) time.Duration {
-	switch reflect.TypeOf(i).Kind() {
-	case reflect.Int:
-		return time.Duration(i.(int)) * time.Second
-	case reflect.String:
-		i, _ := strconv.Atoi(i.(string))
-		return time.Duration(i) * time.Second
-	case reflect.Float64:
-		return time.Duration(i.(float64)) * time.Second
+func parseRouteMatch(match interface{}) ([]string, error) {
+	var raw []string
+	switch v := match.(type) {
+	case nil:
+		return nil, nil
+	case string:
+		raw = strings.Split(v, ",")
+	case []string:
+		raw = v
+	case []interface{}:
+		raw = make([]string, 0, len(v))
+		for i := range v {
+			value, ok := v[i].(string)
+			if !ok {
+				return nil, fmt.Errorf("item %d is not string", i)
+			}
+			raw = append(raw, value)
+		}
 	default:
-		return time.Duration(reflect.ValueOf(i).Int()) * time.Second
+		return nil, fmt.Errorf("unsupported type %T", match)
+	}
+	matches := make([]string, 0, len(raw))
+	for i := range raw {
+		item := strings.TrimSpace(raw[i])
+		if item != "" {
+			matches = append(matches, item)
+		}
+	}
+	return matches, nil
+}
+
+func intervalToTime(i interface{}) time.Duration {
+	switch v := i.(type) {
+	case nil:
+		return 0
+	case int:
+		return time.Duration(v) * time.Second
+	case int8:
+		return time.Duration(v) * time.Second
+	case int16:
+		return time.Duration(v) * time.Second
+	case int32:
+		return time.Duration(v) * time.Second
+	case int64:
+		return time.Duration(v) * time.Second
+	case uint:
+		return time.Duration(v) * time.Second
+	case uint8:
+		return time.Duration(v) * time.Second
+	case uint16:
+		return time.Duration(v) * time.Second
+	case uint32:
+		return time.Duration(v) * time.Second
+	case uint64:
+		return time.Duration(v) * time.Second
+	case float32:
+		return time.Duration(float64(v) * float64(time.Second))
+	case float64:
+		return time.Duration(v * float64(time.Second))
+	case string:
+		if v == "" {
+			return 0
+		}
+		seconds, err := strconv.ParseFloat(v, 64)
+		if err != nil {
+			return 0
+		}
+		return time.Duration(seconds * float64(time.Second))
+	default:
+		return 0
 	}
 }

@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"net/url"
 	"os"
 	"strings"
 
@@ -40,10 +41,10 @@ func (n *NodeConfig) UnmarshalJSON(data []byte) (err error) {
 		return err
 	}
 	if len(rn.Include) != 0 {
-		file, _ := strings.CutPrefix(rn.Include, ":")
-		switch file {
-		case "http", "https":
-			rsp, err := http.Get(file)
+		includePath := strings.TrimSpace(rn.Include)
+		parsedURL, parseErr := url.Parse(includePath)
+		if parseErr == nil && (parsedURL.Scheme == "http" || parsedURL.Scheme == "https") {
+			rsp, err := http.Get(includePath)
 			if err != nil {
 				return err
 			}
@@ -52,8 +53,8 @@ func (n *NodeConfig) UnmarshalJSON(data []byte) (err error) {
 			if err != nil {
 				return fmt.Errorf("open include file error: %s", err)
 			}
-		default:
-			f, err := os.Open(rn.Include)
+		} else {
+			f, err := os.Open(includePath)
 			if err != nil {
 				return fmt.Errorf("open include file error: %s", err)
 			}
@@ -105,14 +106,14 @@ func (n *NodeConfig) UnmarshalJSON(data []byte) (err error) {
 }
 
 type Options struct {
-	Name                   string          `json:"Name"`
-	ListenIP               string          `json:"ListenIP"`
-	SendIP                 string          `json:"SendIP"`
-	DeviceOnlineMinTraffic int64           `json:"DeviceOnlineMinTraffic"`
-	ReportMinTraffic       int64           `json:"ReportMinTraffic"`
-	LimitConfig            LimitConfig     `json:"LimitConfig"`
-	SingOptions            *SingOptions    `json:"SingOptions"`
-	CertConfig             *CertConfig     `json:"CertConfig"`
+	Name                   string       `json:"Name"`
+	ListenIP               string       `json:"ListenIP"`
+	SendIP                 string       `json:"SendIP"`
+	DeviceOnlineMinTraffic int64        `json:"DeviceOnlineMinTraffic"`
+	ReportMinTraffic       int64        `json:"ReportMinTraffic"`
+	LimitConfig            LimitConfig  `json:"LimitConfig"`
+	SingOptions            *SingOptions `json:"SingOptions"`
+	CertConfig             *CertConfig  `json:"CertConfig"`
 }
 
 func (o *Options) UnmarshalJSON(data []byte) error {

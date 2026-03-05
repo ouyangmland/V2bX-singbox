@@ -24,19 +24,25 @@ func (t *Task) Start(first bool) error {
 	t.access.Unlock()
 
 	go func() {
+		interval := t.Interval
+		if interval <= 0 {
+			interval = time.Second
+		}
+
 		if first {
 			if err := t.Execute(); err != nil {
 				t.access.Lock()
 				t.running = false
-				close(t.stop)
 				t.access.Unlock()
 				return
 			}
 		}
+		ticker := time.NewTicker(interval)
+		defer ticker.Stop()
 
 		for {
 			select {
-			case <-time.After(t.Interval):
+			case <-ticker.C:
 			case <-t.stop:
 				return
 			}
@@ -44,7 +50,6 @@ func (t *Task) Start(first bool) error {
 			if err := t.Execute(); err != nil {
 				t.access.Lock()
 				t.running = false
-				close(t.stop)
 				t.access.Unlock()
 				return
 			}
