@@ -2,6 +2,8 @@ name: Build and Release
 
 on:
   workflow_dispatch:
+  repository_dispatch:
+    types: [new-mod-release]
   push:
     branches:
       - main
