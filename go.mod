@@ -10,13 +10,26 @@ require (
 	github.com/go-acme/lego/v4 v4.25.2
 	github.com/go-resty/resty/v2 v2.16.5
 	github.com/juju/ratelimit v1.0.2
-	github.com/sagernet/sing v0.8.1
+	github.com/sagernet/sing v0.8.4
 	github.com/sagernet/sing-box v1.13.6
 	github.com/sirupsen/logrus v1.9.3
 	github.com/spf13/cobra v1.10.2
 	github.com/vmihailenco/msgpack/v5 v5.4.1
 	golang.org/x/crypto v0.48.0
 	golang.org/x/sys v0.41.0
+)
+
+require (
+	github.com/coreos/go-iptables v0.7.1-0.20240112124308-65c67c9f46e6 // indirect
+	github.com/google/nftables v0.2.1-0.20240414091927-5e242ec57806 // indirect
+	github.com/sagernet/cronet-go/lib/linux_loong64 v0.0.0-20260303100323-125d0d93b3e6 // indirect
+	github.com/sagernet/cronet-go/lib/linux_loong64_musl v0.0.0-20260303100323-125d0d93b3e6 // indirect
+	github.com/sagernet/cronet-go/lib/linux_mips64le v0.0.0-20260303100323-125d0d93b3e6 // indirect
+	github.com/sagernet/cronet-go/lib/linux_mipsle v0.0.0-20260303100323-125d0d93b3e6 // indirect
+	github.com/sagernet/cronet-go/lib/linux_mipsle_musl v0.0.0-20260303100323-125d0d93b3e6 // indirect
+	github.com/sagernet/cronet-go/lib/linux_riscv64 v0.0.0-20260303100323-125d0d93b3e6 // indirect
+	github.com/sagernet/cronet-go/lib/linux_riscv64_musl v0.0.0-20260303100323-125d0d93b3e6 // indirect
+	github.com/tailscale/netlink v1.1.1-0.20240822203006-4d49adab4de7 // indirect
 )
 
 require (
@@ -152,7 +165,7 @@ require (
 	github.com/labbsr0x/bindman-dns-webhook v1.0.2 // indirect
 	github.com/labbsr0x/goh v1.0.1 // indirect
 	github.com/leodido/go-urn v1.4.0 // indirect
-	github.com/libdns/acmedns v0.5.0
+	github.com/libdns/acmedns v0.5.0 // indirect
 	github.com/libdns/alidns v1.0.6 // indirect
 	github.com/libdns/cloudflare v0.2.2 // indirect
 	github.com/libdns/libdns v1.1.1 // indirect
@@ -326,4 +339,4 @@ require (
 	lukechampine.com/blake3 v1.4.1 // indirect
 )
 
-replace github.com/sagernet/sing-box => github.com/ouyangmland/sing-box_mod v1.13.6-v2bx.0
+replace github.com/sagernet/sing-box => github.com/ouyangmland/sing-box_mod v1.13.6-v2bx.4
