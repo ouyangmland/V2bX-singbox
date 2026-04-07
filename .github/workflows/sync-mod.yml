@@ -1,0 +1,228 @@
+name: Sync Mod Release
+
+on:
+  schedule:
+    # Check every 30 minutes for new sing-box_mod tags
+    - cron: '*/30 * * * *'
+  workflow_dispatch:
+  repository_dispatch:
+    types: [new-mod-release]
+
+concurrency:
+  group: sync-mod
+  cancel-in-progress: true
+
+jobs:
+  sync:
+    name: Sync sing-box_mod
+    runs-on: ubuntu-latest
+    outputs:
+      tag: ${{ steps.check.outputs.tag }}
+      skipped: ${{ steps.check.outputs.skipped }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5
+        with:
+          fetch-depth: 1
+          token: ${{ secrets.GH_PAT }}
+
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.25.0'
+
+      - name: Get latest sing-box_mod tag
+        id: latest
+        run: |
+          # Find all v2bx tags and get the latest
+          TAGS=$(curl -sL -H "Authorization: Bearer ${{ secrets.GH_PAT }}" \
+            "https://api.github.com/repos/ouyangmland/sing-box_mod/releases?per_page=50" | \
+            python3 -c "
+import sys, json
+releases = json.load(sys.stdin)
+for r in releases:
+    tag = r['tag_name']
+    if 'v2bx' in tag and '-' in tag:
+        print(tag)
+" | sort -V | tail -1)
+          echo "tag=${TAGS}" >> "$GITHUB_OUTPUT"
+          echo "Latest mod tag: ${TAGS}"
+
+      - name: Check if local go.mod already uses this tag
+        id: check
+        run: |
+          CURRENT=$(grep "sing-box_mod v" go.mod | awk '{print $2}')
+          echo "current=${CURRENT}" >> "$GITHUB_OUTPUT"
+          echo "Current go.mod: ${CURRENT}"
+          echo "Latest mod: ${{ steps.latest.outputs.tag }}"
+          if [[ "${{ steps.latest.outputs.tag }}" == "${CURRENT}" ]]; then
+            echo "up_to_date=true" >> "$GITHUB_OUTPUT"
+            echo "skipped=true" >> "$GITHUB_OUTPUT"
+            echo "Already on ${CURRENT}, nothing to do"
+          else
+            echo "up_to_date=false" >> "$GITHUB_OUTPUT"
+            echo "skipped=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Update go.mod to new tag
+        if: steps.check.outputs.up_to_date == 'false'
+        run: |
+          set -xeuo pipefail
+          TAG="${{ steps.latest.outputs.tag }}"
+
+          # Update replace directive
+          sed -i "s|sagernet/sing-box => github.com/ouyangmland/sing-box_mod .*|sagernet/sing-box => github.com/ouyangmland/sing-box_mod ${TAG}|" go.mod
+
+          # Update main dependency
+          sed -i "s|github.com/sagernet/sing-box v[0-9.]*|github.com/sagernet/sing-box ${TAG}|" go.mod
+
+          echo "Updated go.mod to ${TAG}"
+          grep "sing-box" go.mod
+
+      - name: Download new module
+        if: steps.check.outputs.up_to_date == 'false'
+        run: |
+          GOPROXY=https://proxy.golang.org,direct go mod download github.com/ouyangmland/sing-box_mod@${{ steps.latest.outputs.tag }} 2>&1 | tail -3
+
+      - name: Tidy go.mod
+        if: steps.check.outputs.up_to_date == 'false'
+        run: |
+          GOPROXY=https://proxy.golang.org,direct go mod tidy 2>&1 | tail -5
+
+      - name: Verify build
+        if: steps.check.outputs.up_to_date == 'false'
+        id: build
+        run: |
+          GOEXPERIMENT=jsonv2 go build -v -trimpath -o /tmp/v2bx-test . 2>&1 | tail -3
+          echo "size=$(stat -c%s /tmp/v2bx-test)" >> "$GITHUB_OUTPUT"
+          echo "Built: $(du -h /tmp/v2bx-test | cut -f1)"
+
+      - name: Commit and push
+        if: steps.check.outputs.up_to_date == 'false'
+        run: |
+          set -xeuo pipefail
+          TAG="${{ steps.latest.outputs.tag }}"
+          git config --global user.email "action@github.com"
+          git config --global user.name "GitHub Action"
+          git add go.mod go.sum
+          git commit -m "deps: upgrade sing-box_mod to ${TAG}"
+          git push origin dev_new
+          echo "tag=${TAG}" >> "$GITHUB_OUTPUT"
+          echo "Pushed: ${TAG}"
+
+      - name: Create tag
+        if: steps.check.outputs.up_to_date == 'false'
+        run: |
+          TAG="${{ steps.latest.outputs.tag }}"
+          # Create a V2bX version tag (reuse same version number)
+          # e.g. v1.13.6-v2bx.0 from sing-box_mod -> V2bX-singbox also tags as v1.13.6-v2bx.X
+          # Actually V2bX-singbox should tag its own releases differently
+          echo "Mod synced, will trigger release build"
+
+  release:
+    name: Build Linux Release
+    runs-on: ubuntu-latest
+    needs: sync
+    if: needs.sync.outputs.tag != '' && needs.sync.outputs.skipped != 'true'
+    steps:
+      - name: Checkout
+        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GH_PAT }}
+
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.25.0'
+
+      - name: Get dependencies
+        run: |
+          GOPROXY=https://proxy.golang.org,direct go mod download
+
+      - name: Get version
+        id: version
+        run: |
+          # Use the synced mod tag as version
+          echo "VERSION=${{ needs.sync.outputs.tag }}" >> "$GITHUB_OUTPUT"
+          echo "VERSION=${{ needs.sync.outputs.tag }}" >> "$GITHUB_ENV"
+
+      - name: Build Linux amd64
+        run: |
+          GOEXPERIMENT=jsonv2 CGO_ENABLED=0 go build \
+            -ldflags="-X github.com/ouyangmland/V2bX-singbox/cmd.version=${VERSION} -s -w" \
+            -o V2bX .
+          mkdir -p dist
+          cp V2bX dist/V2bX-linux-amd64
+
+      - name: Build Linux arm64
+        run: |
+          GOEXPERIMENT=jsonv2 CGO_ENABLED=0 GOOS=linux GOARCH=arm64 go build \
+            -ldflags="-X github.com/ouyangmland/V2bX-singbox/cmd.version=${VERSION} -s -w" \
+            -o V2bX .
+          cp V2bX dist/V2bX-linux-arm64
+
+      - name: Package
+        run: |
+          cd dist
+          for f in V2bX-linux-*; do
+            zip -9vr "../${f}.zip" "$f"
+          done
+
+      - name: Create Release
+        if: needs.sync.outputs.tag != ''
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GH_PAT }}
+        with:
+          tag_name: ${{ needs.sync.outputs.tag }}
+          release_name: "V2bX ${{ needs.sync.outputs.tag }}"
+          body: |
+            ## V2bX-singbox ${{ needs.sync.outputs.tag }}
+
+            Built from [sing-box_mod ${{ needs.sync.outputs.tag }}](https://github.com/ouyangmland/sing-box_mod/releases/tag/${{ needs.sync.outputs.tag }}).
+
+            ### Features
+            - Linux amd64/arm64 binaries
+            - Automatically built when sing-box_mod releases a new version
+
+            Built by GitHub Actions.
+          draft: false
+          prerelease: false
+
+      - name: Upload artifacts
+        if: needs.sync.outputs.tag != ''
+        uses: actions/upload-release-attachment@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GH_PAT }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./dist/V2bX-linux-amd64.zip
+          asset_name: V2bX-linux-amd64.zip
+          asset_content_type: application/zip
+
+      - name: Upload arm64 artifact
+        if: needs.sync.outputs.tag != ''
+        uses: actions/upload-release-attachment@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GH_PAT }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./dist/V2bX-linux-arm64.zip
+          asset_name: V2bX-linux-arm64.zip
+          asset_content_type: application/zip
+
+  notify:
+    name: Done
+    runs-on: ubuntu-latest
+    needs: [sync, release]
+    if: always()
+    steps:
+      - name: Summary
+        run: |
+          if [[ "${{ needs.sync.outputs.skipped }}" == "true" ]]; then
+            echo "Already on latest mod release. No build needed."
+          else
+            echo "V2bX-singbox ${{ needs.sync.outputs.tag }} released."
+          fi
