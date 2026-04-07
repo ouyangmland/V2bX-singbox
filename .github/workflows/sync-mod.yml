@@ -8,9 +8,6 @@ on:
 jobs:
   sync:
     runs-on: ubuntu-latest
-    outputs:
-      tag: ${{ steps.latest.outputs.tag }}
-      skipped: ${{ steps.check.outputs.skipped }}
     steps:
       - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8
         with:
@@ -29,31 +26,29 @@ jobs:
           LATEST=$(cat /tmp/tag.txt | tr -d '\n')
           echo "tag=${LATEST}" >> "$GITHUB_OUTPUT"
 
-      - name: Check go.mod
-        id: check
+      - name: Check and update go.mod
+        env:
+          LATEST_TAG: ${{ steps.latest.outputs.tag }}
         run: |
           CURRENT=$(grep "sing-box_mod v" go.mod | awk '{print $2}')
-          echo "current=${CURRENT}" >> "$GITHUB_OUTPUT"
-          if [[ "${{ steps.latest.outputs.tag }}" == "${CURRENT}" || -z "${{ steps.latest.outputs.tag }}" ]]; then
-            echo "skipped=true" >> "$GITHUB_OUTPUT"
+          echo "Current: ${CURRENT}, Latest: ${LATEST_TAG}"
+          if [[ "${LATEST_TAG}" == "${CURRENT}" || -z "${LATEST_TAG}" ]]; then
+            echo "SKIP_BUILD=true" >> "$GITHUB_ENV"
           else
-            echo "skipped=false" >> "$GITHUB_OUTPUT"
+            sed -i "s|github.com/ouyangmland/sing-box_mod v[^ ]*|github.com/ouyangmland/sing-box_mod ${LATEST_TAG}|" go.mod
+            GOPROXY=https://proxy.golang.org,direct go mod tidy
+            GOEXPERIMENT=jsonv2 go build -trimpath -o /tmp/v2bx .
+            echo "SKIP_BUILD=false" >> "$GITHUB_ENV"
           fi
 
-      - name: Update and build
-        if: steps.check.outputs.skipped == 'false'
-        run: |
-          TAG="${{ steps.latest.outputs.tag }}"
-          sed -i "s|github.com/ouyangmland/sing-box_mod v[^ ]*|github.com/ouyangmland/sing-box_mod ${TAG}|" go.mod
-          GOPROXY=https://proxy.golang.org,direct go mod tidy
-          GOEXPERIMENT=jsonv2 go build -trimpath -o /tmp/v2bx .
-
       - name: Commit and push
-        if: steps.check.outputs.skipped == 'false'
+        if: env.SKIP_BUILD != 'true'
+        env:
+          LATEST_TAG: ${{ steps.latest.outputs.tag }}
         run: |
           git config --global user.email "action@github.com"
           git config --global user.name "GitHub Action"
-          git add go.mod go.sum && git commit -m "deps: ${{ steps.latest.outputs.tag }}" && git push origin dev_new
+          git add go.mod go.sum && git commit -m "deps: ${LATEST_TAG}" && git push origin dev_new
 
   release:
     runs-on: ubuntu-latest
@@ -89,9 +84,9 @@ jobs:
         id: create_release
         uses: softprops/action-gh-release@v1
         with:
-          tag_name: ${{ needs.sync.outputs.tag }}
-          name: "V2bX ${{ needs.sync.outputs.tag }}"
-          body: "Built from [sing-box_mod ${{ needs.sync.outputs.tag }}](https://github.com/ouyangmland/sing-box_mod/releases/tag/${{ needs.sync.outputs.tag }})."
+          tag_name: ${{ needs.sync.outputs.tag || 'v' && github.ref }}
+          name: "V2bX ${{ github.ref }}"
+          body: "Built from [sing-box_mod ${{ github.ref }}](https://github.com/ouyangmland/sing-box_mod/releases/tag/${{ github.ref }})."
           draft: false
           prerelease: false
         env:
