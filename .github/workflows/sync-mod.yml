@@ -42,7 +42,7 @@ import sys, json
 releases = json.load(sys.stdin)
 for r in releases:
     tag = r['tag_name']
-    if 'v2bx' in tag and '-' in tag:
+    if 'v2bx' in tag and tag.startswith('v'):
         print(tag)
 " | sort -V | tail -1)
           echo "tag=${TAGS}" >> "$GITHUB_OUTPUT"
