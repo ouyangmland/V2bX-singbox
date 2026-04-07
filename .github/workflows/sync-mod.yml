@@ -2,8 +2,8 @@ name: Sync Mod Release
 
 on:
   schedule:
-    # Check every 30 minutes for new sing-box_mod tags
-    - cron: '*/30 * * * *'
+    # Check every 7 hours for new sing-box_mod tags
+    - cron: '0 */7 * * *'
   workflow_dispatch:
   repository_dispatch:
     types: [new-mod-release]
