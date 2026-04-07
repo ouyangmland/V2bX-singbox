@@ -11,8 +11,6 @@ env:
 jobs:
   sync:
     runs-on: ubuntu-latest
-    outputs:
-      tag: ${{ steps.push.outputs.tag }}
     steps:
       - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8
         with:
@@ -22,49 +20,137 @@ jobs:
         with:
           go-version: '1.25.0'
 
-      - name: Get latest sing-box_mod release
-        id: latest
+      - name: Get latest
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           python3 .github/workflows/get-latest-tag.py > /tmp/tag.txt
           LATEST=$(cat /tmp/tag.txt | tr -d '\n')
-          echo "tag=${LATEST}" >> "$GITHUB_OUTPUT"
           echo "Latest tag: '${LATEST}'"
+          echo "${LATEST}" > /tmp/TAG
+          echo "tag=${LATEST}" >> "$GITHUB_OUTPUT"
 
-      - name: Check and update
-        id: check
+      - name: Update go.mod
         env:
           LATEST_TAG: ${{ steps.latest.outputs.tag }}
         run: |
           CURRENT=$(grep "sing-box_mod v" go.mod | awk '{print $2}')
-          echo "Current: '${CURRENT}', Latest: '${LATEST_TAG}'"
+          echo "Current go.mod: '${CURRENT}', Latest: '${LATEST_TAG}'"
           if [[ -n "${LATEST_TAG}" && "${LATEST_TAG}" != "${CURRENT}" ]]; then
             sed -i "s|github.com/ouyangmland/sing-box_mod v[^ ]*|github.com/ouyangmland/sing-box_mod ${LATEST_TAG}|" go.mod
-            GOPROXY=https://proxy.golang.org,direct go mod tidy
-            GOEXPERIMENT=jsonv2 go build -trimpath -o /tmp/v2bx .
-            echo "tag=${LATEST_TAG}" > /tmp/tag_for_release
-            echo "tag=${LATEST_TAG}" >> "$GITHUB_OUTPUT"
-            echo "UPDATED=true" >> "$GITHUB_ENV"
+            echo "Updated go.mod to ${LATEST_TAG}"
           else
-            echo "UPDATED=false" >> "$GITHUB_ENV"
+            echo "No update needed"
           fi
 
-      - name: Commit and push
-        if: env.UPDATED == 'true'
+      - name: Tidy and build
+        run: |
+          GOPROXY=https://proxy.golang.org,direct go mod tidy
+          GOEXPERIMENT=jsonv2 go build -trimpath -o /tmp/v2bx .
+
+      - name: Push
         env:
           LATEST_TAG: ${{ steps.latest.outputs.tag }}
         run: |
           git config --global user.email "action@github.com"
           git config --global user.name "GitHub Action"
           git add go.mod go.sum
-          git commit -m "${LATEST_TAG}"
+          git diff --staged --quiet && echo "No changes to commit" || git commit -m "${LATEST_TAG}"
           git push origin dev_new
 
-      - name: Record tag for release job
-        id: push
-        env:
-          LATEST_TAG: ${{ steps.latest.outputs.tag }}
+      - name: Upload tag artifact
         run: |
-          echo "tag=${LATEST_TAG}" >> "$GITHUB_OUTPUT"
-          echo "${LATEST_TAG}" > /tmp/tag_file
+          echo "${{ steps.latest.outputs.tag }}" > /tmp/TAG
+          ls -la /tmp/TAG
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: tag-file
+          path: /tmp/TAG
+          retention-days: 1
+
+  release:
+    runs-on: ubuntu-latest
+    needs: sync
+    steps:
+      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - uses: actions/download-artifact@v4
+        with:
+          name: tag-file
+          path: .
+          merge-multiple: false
+
+      - name: Read tag
+        id: tag
+        run: |
+          TAG=$(cat TAG 2>/dev/null || echo "")
+          echo "Tag: '${TAG}'"
+          if [[ -z "${TAG}" ]]; then
+            echo "No tag found, skipping release"
+            echo "SKIP=true" >> "$GITHUB_ENV"
+          else
+            echo "SKIP=false" >> "$GITHUB_ENV"
+            echo "tag=${TAG}" >> "$GITHUB_OUTPUT"
+          fi
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version: '1.25.0'
+
+      - name: Get deps
+        run: GOPROXY=https://proxy.golang.org,direct go mod download
+
+      - name: Build amd64
+        run: |
+          GOEXPERIMENT=jsonv2 CGO_ENABLED=0 go build -ldflags="-s -w" -o V2bX .
+          mkdir -p dist && cp V2bX dist/V2bX-linux-amd64
+
+      - name: Build arm64
+        run: |
+          GOEXPERIMENT=jsonv2 CGO_ENABLED=0 GOOS=linux GOARCH=arm64 go build -ldflags="-s -w" -o V2bX .
+          cp V2bX dist/V2bX-linux-arm64
+
+      - name: Package
+        run: |
+          cd dist
+          zip -9 ../V2bX-linux-amd64.zip V2bX-linux-amd64
+          zip -9 ../V2bX-linux-arm64.zip V2bX-linux-arm64
+
+      - name: Create release
+        if: env.SKIP != 'true'
+        id: release
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: ${{ steps.tag.outputs.tag }}
+          name: "V2bX ${{ steps.tag.outputs.tag }}"
+          body: "Built from [sing-box_mod ${{ steps.tag.outputs.tag }}](https://github.com/ouyangmland/sing-box_mod/releases/tag/${{ steps.tag.outputs.tag }})."
+          draft: false
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Upload amd64
+        if: env.SKIP != 'true'
+        uses: actions/upload-release-asset@v1
+        with:
+          upload_url: ${{ steps.release.outputs.upload_url }}
+          asset_path: ./V2bX-linux-amd64.zip
+          asset_name: V2bX-linux-amd64.zip
+          asset_content_type: application/zip
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Upload arm64
+        if: env.SKIP != 'true'
+        uses: actions/upload-release-asset@v1
+        with:
+          upload_url: ${{ steps.release.outputs.upload_url }}
+          asset_path: ./V2bX-linux-arm64.zip
+          asset_name: V2bX-linux-arm64.zip
+          asset_content_type: application/zip
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
