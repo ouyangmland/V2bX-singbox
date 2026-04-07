@@ -7,10 +7,6 @@ on:
   repository_dispatch:
     types: [new-mod-release]
 
-concurrency:
-  group: sync-mod
-  cancel-in-progress: false
-
 jobs:
   sync:
     name: Sync sing-box_mod
