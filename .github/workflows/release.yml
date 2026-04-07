@@ -109,7 +109,6 @@ jobs:
           path: ./V2bX-${{ matrix.goos }}-${{ matrix.goarch }}${{ matrix.goarm }}.zip
       - name: Release
         if: github.event_name == 'release'
-        if: github.event_name == 'release'
         uses: svenstaro/upload-release-action@v2
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
