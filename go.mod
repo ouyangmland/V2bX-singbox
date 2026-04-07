@@ -11,7 +11,7 @@ require (
 	github.com/go-resty/resty/v2 v2.16.5
 	github.com/juju/ratelimit v1.0.2
 	github.com/sagernet/sing v0.8.1
-	github.com/sagernet/sing-box v1.13.0
+	github.com/sagernet/sing-box v1.13.6
 	github.com/sirupsen/logrus v1.9.3
 	github.com/spf13/cobra v1.10.2
 	github.com/vmihailenco/msgpack/v5 v5.4.1
@@ -326,4 +326,4 @@ require (
 	lukechampine.com/blake3 v1.4.1 // indirect
 )
 
-replace github.com/sagernet/sing-box => github.com/MoeclubM/sing-box_mod v1.13.1-beta.2-v2bx.2
+replace github.com/sagernet/sing-box => github.com/ouyangmland/sing-box_mod v1.13.6-v2bx.0
