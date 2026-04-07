@@ -2,10 +2,62 @@ name: Sync Mod Release
 
 on:
   workflow_dispatch:
+  schedule:
+    - cron: '0 */7 * * *'
+  repository_dispatch:
+    types: [new-mod-release]
 
 jobs:
   sync:
     runs-on: ubuntu-latest
+    outputs:
+      tag: ${{ steps.latest.outputs.tag }}
+      skipped: ${{ steps.check.outputs.skipped }}
     steps:
       - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8
-      - run: echo "hello world"
+        with:
+          fetch-depth: 1
+          token: ${{ secrets.GH_PAT }}
+      - uses: actions/setup-go@v5
+        with:
+          go-version: '1.25.0'
+      - name: Get latest tag
+        id: latest
+        env:
+          GH_TOKEN: ${{ secrets.GH_PAT }}
+        run: |
+          python3 .github/workflows/get-latest-tag.py > /tmp/tag.txt
+          LATEST=$(cat /tmp/tag.txt | tr -d '\n')
+          echo "tag=${LATEST}" >> "$GITHUB_OUTPUT"
+          echo "Latest mod tag: ${LATEST}"
+      - name: Check go.mod
+        id: check
+        run: |
+          CURRENT=$(grep "sing-box_mod v" go.mod | awk '{print $2}')
+          echo "current=${CURRENT}" >> "$GITHUB_OUTPUT"
+          echo "Current: ${CURRENT}, Latest: ${{ steps.latest.outputs.tag }}"
+          if [[ "${{ steps.latest.outputs.tag }}" == "${CURRENT}" || -z "${{ steps.latest.outputs.tag }}" ]]; then
+            echo "skipped=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "skipped=false" >> "$GITHUB_OUTPUT"
+          fi
+      - name: Update go.mod
+        if: steps.check.outputs.skipped == 'false'
+        run: |
+          TAG="${{ steps.latest.outputs.tag }}"
+          sed -i "s|github.com/ouyangmland/sing-box_mod v[^ ]*|github.com/ouyangmland/sing-box_mod ${TAG}|" go.mod
+          grep "sing-box_mod" go.mod
+      - name: Tidy modules
+        if: steps.check.outputs.skipped == 'false'
+        run: GOPROXY=https://proxy.golang.org,direct go mod tidy
+      - name: Verify build
+        if: steps.check.outputs.skipped == 'false'
+        run: GOEXPERIMENT=jsonv2 go build -trimpath -o /tmp/v2bx-test . 2>&1 | tail -3
+      - name: Commit and push
+        if: steps.check.outputs.skipped == 'false'
+        run: |
+          git config --global user.email "action@github.com"
+          git config --global user.name "GitHub Action"
+          git add go.mod go.sum
+          git commit -m "deps: upgrade to ${{ steps.latest.outputs.tag }}"
+          git push origin dev_new
