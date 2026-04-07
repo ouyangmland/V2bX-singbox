@@ -833,6 +833,8 @@ github.com/ouyangmland/sing-box_mod v1.13.6-v2bx.3 h1:1B30ml85Yp1GFsdohYWvAwGIVr
 github.com/ouyangmland/sing-box_mod v1.13.6-v2bx.3/go.mod h1:My2sXPc6sv0cI6AhGrrHez7oblpBBetVx6/xqkcpSsc=
 github.com/ouyangmland/sing-box_mod v1.13.6-v2bx.4 h1:Hq75aczOQ6EsnqaJkQ5GAEh3SWtHefSvqloK5027afE=
 github.com/ouyangmland/sing-box_mod v1.13.6-v2bx.4/go.mod h1:My2sXPc6sv0cI6AhGrrHez7oblpBBetVx6/xqkcpSsc=
+github.com/ouyangmland/sing-box_mod v1.13.6-v2bx.5 h1:Zaoo8ewqpeBSk5lqQa7Gd4Y/Gifny7uLp2wqITLR61Y=
+github.com/ouyangmland/sing-box_mod v1.13.6-v2bx.5/go.mod h1:My2sXPc6sv0cI6AhGrrHez7oblpBBetVx6/xqkcpSsc=
 github.com/ovh/go-ovh v1.9.0 h1:6K8VoL3BYjVV3In9tPJUdT7qMx9h0GExN9EXx1r2kKE=
 github.com/ovh/go-ovh v1.9.0/go.mod h1:cTVDnl94z4tl8pP1uZ/8jlVxntjSIf09bNcQ5TJSC7c=
 github.com/pascaldekloe/goe v0.0.0-20180627143212-57f6aae5913c/go.mod h1:lzWF7FIEvWOWxwDKqyGYQf6ZUaNfKdP144TG7ZOy1lc=
