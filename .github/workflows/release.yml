@@ -82,7 +82,7 @@ jobs:
       - name: Upload
         uses: actions/upload-artifact@v4
         with:
-          name: $ARCHIVE
+          name: $ARCHIVE-${{ github.run_id }}
           path: ./V2bX-${{ matrix.goos }}-${{ matrix.goarch }}${{ matrix.goarm }}.zip
       - name: Release
         if: github.event_name == 'release'
