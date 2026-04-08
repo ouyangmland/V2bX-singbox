@@ -339,4 +339,4 @@ require (
 	lukechampine.com/blake3 v1.4.1 // indirect
 )
 
-replace github.com/sagernet/sing-box => github.com/ouyangmland/sing-box_mod v1.13.6-v2bx.12
+replace github.com/sagernet/sing-box => github.com/ouyangmland/sing-box_mod v1.13.6-v2bx.0.0.20260408120025-a60f3328c882
