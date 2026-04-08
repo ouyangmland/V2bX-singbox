@@ -85,6 +85,8 @@ jobs:
         run: |
           if [ "${{ github.event_name }}" = "release" ]; then
             TAG="${{ github.ref_name }}"
+          elif [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            TAG="${{ github.ref_name }}"
           else
             TAG="${{ github.event.client_payload.tag }}"
           fi
