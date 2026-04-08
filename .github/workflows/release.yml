@@ -48,11 +48,11 @@ jobs:
           echo "VERSION=$VERSION" >> $GITHUB_ENV
       - name: Build amd64
         run: |
-          GOARCH=amd64 GOEXPERIMENT=jsonv2 go build -ldflags="-X github.com/ouyangmland/V2bX-singbox/cmd.version=${VERSION} -s -w" -o "V2bX-linux-amd64" .
+          CGO_ENABLED=0 GOARCH=amd64 GOEXPERIMENT=jsonv2 go build -ldflags="-X github.com/ouyangmland/V2bX-singbox/cmd.version=${VERSION} -s -w" -o "V2bX-linux-amd64" .
           ls -lh V2bX-linux-amd64
       - name: Build arm64
         run: |
-          GOARCH=arm64 GOEXPERIMENT=jsonv2 go build -ldflags="-X github.com/ouyangmland/V2bX-singbox/cmd.version=${VERSION} -s -w" -o "V2bX-linux-arm64" .
+          CGO_ENABLED=0 GOARCH=arm64 GOEXPERIMENT=jsonv2 go build -ldflags="-X github.com/ouyangmland/V2bX-singbox/cmd.version=${VERSION} -s -w" -o "V2bX-linux-arm64" .
           ls -lh V2bX-linux-arm64
       - name: Prepare amd64
         run: |
