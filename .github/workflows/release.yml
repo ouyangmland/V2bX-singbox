@@ -28,21 +28,7 @@ on:
 
 jobs:
   build:
-    strategy:
-      matrix:
-        goos: [linux]
-        goarch: [amd64, arm64]
-    concurrency:
-      group: ${{ github.workflow }}-${{ github.ref }}
-      cancel-in-progress: true
-
     runs-on: ubuntu-latest
-    env:
-      GOOS: ${{ matrix.goos }}
-      GOARCH: ${{ matrix.goarch }}
-      GOARM: ${{ matrix.goarm }}
-      CGO_ENABLED: 0
-
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-go@v5
@@ -60,36 +46,44 @@ jobs:
           fi
           echo "VERSION=$VERSION" >> $GITHUB_OUTPUT
           echo "VERSION=$VERSION" >> $GITHUB_ENV
-      - name: Build
+      - name: Build amd64
         run: |
-          OUTPUT="V2bX"
-          if [ "${{ matrix.goos }}" = "windows" ]; then
-            OUTPUT="V2bX.exe"
-          fi
-          GOEXPERIMENT=jsonv2 go build -ldflags="-X github.com/ouyangmland/V2bX-singbox/cmd.version=${VERSION} -s -w" -o "$OUTPUT" .
-          ls -lh "$OUTPUT"
-      - name: Prepare
+          GOARCH=amd64 GOEXPERIMENT=jsonv2 go build -ldflags="-X github.com/ouyangmland/V2bX-singbox/cmd.version=${VERSION} -s -w" -o "V2bX-linux-amd64" .
+          ls -lh V2bX-linux-amd64
+      - name: Build arm64
         run: |
-          mkdir -p build_assets
-          cp README.md LICENSE build_assets/ 2>/dev/null || true
-          cp example/*.json build_assets/ 2>/dev/null || true
-          cp V2bX* build_assets/ 2>/dev/null || true
-      - name: Package
+          GOARCH=arm64 GOEXPERIMENT=jsonv2 go build -ldflags="-X github.com/ouyangmland/V2bX-singbox/cmd.version=${VERSION} -s -w" -o "V2bX-linux-arm64" .
+          ls -lh V2bX-linux-arm64
+      - name: Prepare amd64
         run: |
-          ARCHIVE="V2bX-${{ matrix.goos }}-${{ matrix.goarch }}${{ matrix.goarm }}"
-          cd build_assets
-          zip -9vr "../$ARCHIVE.zip" . -x "*.DS_Store"
-      - name: Wait before upload
-        run: sleep 5
-      - name: Upload
+          mkdir -p build_amd64
+          cp README.md LICENSE build_amd64/ 2>/dev/null || true
+          cp example/*.json build_amd64/ 2>/dev/null || true
+          cp V2bX-linux-amd64 build_amd64/V2bX
+          cd build_amd64
+          zip -9vr "../V2bX-linux-amd64.zip" . -x "*.DS_Store"
+      - name: Prepare arm64
+        run: |
+          mkdir -p build_arm64
+          cp README.md LICENSE build_arm64/ 2>/dev/null || true
+          cp example/*.json build_arm64/ 2>/dev/null || true
+          cp V2bX-linux-arm64 build_arm64/V2bX
+          cd build_arm64
+          zip -9vr "../V2bX-linux-arm64.zip" . -x "*.DS_Store"
+      - name: Upload amd64
         uses: actions/upload-artifact@v4
         with:
-          name: $ARCHIVE-${{ github.run_id }}
-          path: ./V2bX-${{ matrix.goos }}-${{ matrix.goarch }}${{ matrix.goarm }}.zip
+          name: V2bX-linux-amd64
+          path: ./V2bX-linux-amd64.zip
+      - name: Upload arm64
+        uses: actions/upload-artifact@v4
+        with:
+          name: V2bX-linux-arm64
+          path: ./V2bX-linux-arm64.zip
       - name: Release
         if: github.event_name == 'release'
         uses: svenstaro/upload-release-action@v2
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
-          file: ./V2bX-${{ matrix.goos }}-${{ matrix.goarch }}${{ matrix.goarm }}.zip
+          file: ./V2bX-linux-amd64.zip,./V2bX-linux-arm64.zip
           tag: ${{ github.ref }}
