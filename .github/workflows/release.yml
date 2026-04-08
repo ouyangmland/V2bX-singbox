@@ -80,10 +80,27 @@ jobs:
         with:
           name: V2bX-linux-arm64
           path: ./V2bX-linux-arm64.zip
-      - name: Release
-        if: github.event_name == 'release'
-        uses: svenstaro/upload-release-action@v2
+      - name: Get tag for release
+        id: get_tag
+        run: |
+          if [ "${{ github.event_name }}" = "release" ]; then
+            TAG="${{ github.ref_name }}"
+          else
+            TAG="v${{ github.event.client_payload.tag || github.sha }}"
+            TAG="${TAG:0:12}"
+          fi
+          echo "tag=$TAG" >> $GITHUB_OUTPUT
+          echo "tag=$TAG" >> $GITHUB_ENV
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v1
         with:
-          repo_token: ${{ secrets.GITHUB_TOKEN }}
-          file: ./V2bX-linux-amd64.zip,./V2bX-linux-arm64.zip
-          tag: ${{ github.ref }}
+          tag_name: ${{ steps.get_tag.outputs.tag }}
+          name: V2bX ${{ steps.get_tag.outputs.tag }}
+          draft: false
+          prerelease: false
+          files: |
+            ./V2bX-linux-amd64.zip
+            ./V2bX-linux-arm64.zip
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
