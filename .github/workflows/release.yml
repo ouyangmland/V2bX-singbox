@@ -50,8 +50,8 @@ jobs:
           fi
           echo "VERSION=$VERSION" >> $GITHUB_OUTPUT
           echo "VERSION=$VERSION" >> $GITHUB_ENV
-          echo "FILENAME_AMD64=V2bX-linux-amd64-${VERSION}.zip" >> $GITHUB_ENV
-          echo "FILENAME_ARM64=V2bX-linux-arm64-${VERSION}.zip" >> $GITHUB_ENV
+          echo "FILENAME_AMD64=V2bX-linux-amd64.zip" >> $GITHUB_ENV
+          echo "FILENAME_ARM64=V2bX-linux-arm64.zip" >> $GITHUB_ENV
       - name: Build amd64
         run: |
           CGO_ENABLED=0 GOARCH=amd64 GOEXPERIMENT=jsonv2 go build -ldflags="-X github.com/ouyangmland/V2bX-singbox/cmd.version=${VERSION} -s -w" -o "V2bX-linux-amd64" .
