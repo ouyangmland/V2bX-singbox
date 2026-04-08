@@ -86,7 +86,7 @@ jobs:
           if [ "${{ github.event_name }}" = "release" ]; then
             TAG="${{ github.ref_name }}"
           else
-            TAG="v${{ github.event.client_payload.tag || github.sha }}"
+            TAG="${{ github.event.client_payload.tag || github.sha }}"
             TAG="${TAG:0:12}"
           fi
           echo "tag=$TAG" >> $GITHUB_OUTPUT
