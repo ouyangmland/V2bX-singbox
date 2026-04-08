@@ -78,7 +78,7 @@ jobs:
           cd build_assets
           zip -9vr "../$ARCHIVE.zip" . -x "*.DS_Store"
       - name: Upload
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v3
         with:
           name: $ARCHIVE
           path: ./V2bX-${{ matrix.goos }}-${{ matrix.goarch }}${{ matrix.goarm }}.zip
