@@ -96,7 +96,10 @@ jobs:
           else
             TAG=""
           fi
+          # Strip v prefix and v2bx- prefix for display name
+          RELEASE_NAME="V2bX $(echo "$TAG" | sed 's/^v//' | cut -d- -f2-)"
           echo "tag=$TAG" >> $GITHUB_OUTPUT
+          echo "RELEASE_NAME=$RELEASE_NAME" >> $GITHUB_ENV
           echo "tag=$TAG" >> $GITHUB_ENV
 
       - name: Create Release
@@ -104,7 +107,7 @@ jobs:
         uses: softprops/action-gh-release@v1
         with:
           tag_name: ${{ steps.get_tag.outputs.tag }}
-          name: V2bX ${{ steps.get_tag.outputs.tag }}
+          name: ${{ env.RELEASE_NAME }}
           draft: false
           prerelease: false
           files: |
