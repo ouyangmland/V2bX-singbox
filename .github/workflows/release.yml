@@ -51,6 +51,8 @@ jobs:
           fi
           echo "VERSION=$VERSION" >> $GITHUB_OUTPUT
           echo "VERSION=$VERSION" >> $GITHUB_ENV
+          echo "FILENAME_AMD64=V2bX-linux-amd64-${VERSION}.zip" >> $GITHUB_ENV
+          echo "FILENAME_ARM64=V2bX-linux-arm64-${VERSION}.zip" >> $GITHUB_ENV
       - name: Build amd64
         run: |
           CGO_ENABLED=0 GOARCH=amd64 GOEXPERIMENT=jsonv2 go build -ldflags="-X github.com/ouyangmland/V2bX-singbox/cmd.version=${VERSION} -s -w" -o "V2bX-linux-amd64" .
@@ -79,12 +81,12 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: V2bX-linux-amd64
-          path: ./V2bX-linux-amd64-${VERSION}.zip
+          path: ${{ env.FILENAME_AMD64 }}
       - name: Upload arm64
         uses: actions/upload-artifact@v4
         with:
           name: V2bX-linux-arm64
-          path: ./V2bX-linux-arm64-${VERSION}.zip
+          path: ${{ env.FILENAME_ARM64 }}
       - name: Get tag for release
         id: get_tag
         run: |
@@ -107,7 +109,7 @@ jobs:
           draft: false
           prerelease: false
           files: |
-            ./V2bX-linux-amd64-${VERSION}.zip
-            ./V2bX-linux-arm64-${VERSION}.zip
+            ${{ env.FILENAME_AMD64 }}
+            ${{ env.FILENAME_ARM64 }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
