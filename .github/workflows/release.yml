@@ -1,5 +1,20 @@
 name: Build and Release
 
+permissions:
+  contents: write
+  actions: write
+  attestations: write
+  checks: write
+  deployments: write
+  discussions: write
+  issues: write
+  packages: write
+  pages: write
+  pull-requests: write
+  repository-projects: write
+  security-events: write
+  statuses: write
+
 on:
   workflow_dispatch:
   repository_dispatch:
