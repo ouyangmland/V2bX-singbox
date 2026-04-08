@@ -39,19 +39,21 @@ jobs:
       - name: Get version
         id: version
         run: |
-          EVENT="${{ github.event_name }}"
-          if [ "$EVENT" = "release" ]; then
-            VERSION="${{ github.ref_name }}"
-          elif [ "$EVENT" = "repository_dispatch" ]; then
-            TAG="${{ github.event.client_payload.tag }}"
-            VERSION="${TAG#v}"
-            VERSION="${VERSION#*-}"
-          else
-            VERSION="${GITHUB_SHA:0:8}"
-          fi
+          case "${{ github.event_name }}" in
+            release)
+              VERSION="${{ github.ref_name }}"
+              ;;
+            repository_dispatch)
+              TAG="${{ github.event.client_payload.tag }}"
+              VERSION="${TAG#v}"
+              VERSION="${VERSION#*-}"
+              ;;
+            *)
+              VERSION="${GITHUB_SHA:0:8}"
+              ;;
+          esac
           echo "VERSION=$VERSION" >> $GITHUB_OUTPUT
           echo "VERSION=$VERSION" >> $GITHUB_ENV
-          echo "EVENT=$EVENT" >> $GITHUB_OUTPUT
       - name: Build amd64
         run: |
           CGO_ENABLED=0 GOARCH=amd64 GOEXPERIMENT=jsonv2 go build -ldflags="-X github.com/ouyangmland/V2bX-singbox/cmd.version=${VERSION} -s -w" -o "V2bX-linux-amd64" .
