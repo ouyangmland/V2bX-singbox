@@ -57,8 +57,9 @@ jobs:
             -e CGO_ENABLED=0 \
             -e GOARCH=amd64 \
             -e GOEXPERIMENT=jsonv2 \
+            -e VERSION \
             golang:1.25-alpine \
-            sh -c "go mod download && go build -ldflags=\"-X github.com/ouyangmland/V2bX-singbox/cmd.version=${VERSION} -s -w\" -trimpath -o V2bX-linux-amd64 ."
+            sh -c "go mod download && go build -ldflags=\"-X github.com/ouyangmland/V2bX-singbox/cmd.version=\${VERSION} -s -w\" -trimpath -o V2bX-linux-amd64 ."
           ls -lh V2bX-linux-amd64
       - name: Build arm64 (Alpine/musl)
         run: |
@@ -69,8 +70,9 @@ jobs:
             -e CGO_ENABLED=0 \
             -e GOARCH=arm64 \
             -e GOEXPERIMENT=jsonv2 \
+            -e VERSION \
             golang:1.25-alpine \
-            sh -c "go mod download && go build -ldflags=\"-X github.com/ouyangmland/V2bX-singbox/cmd.version=${VERSION} -s -w\" -trimpath -o V2bX-linux-arm64 ."
+            sh -c "go mod download && go build -ldflags=\"-X github.com/ouyangmland/V2bX-singbox/cmd.version=\${VERSION} -s -w\" -trimpath -o V2bX-linux-arm64 ."
           ls -lh V2bX-linux-arm64
       - name: Prepare amd64
         run: |
