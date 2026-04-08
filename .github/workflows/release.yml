@@ -51,28 +51,30 @@ jobs:
       - name: Build amd64 (Alpine/musl)
         run: |
           VERSION="${{ steps.version.outputs.VERSION }}"
+          printf '#!/bin/sh\ngo mod download\ngo build -ldflags="-X github.com/ouyangmland/V2bX-singbox/cmd.version=${VERSION} -s -w" -trimpath -o V2bX-linux-amd64 .\n' > build-amd64.sh
           docker run --rm \
             -v "$PWD":/build \
             -w /build \
             -e CGO_ENABLED=0 \
             -e GOARCH=amd64 \
             -e GOEXPERIMENT=jsonv2 \
-            -e VERSION \
+            --env VERSION="$VERSION" \
             golang:1.25-alpine \
-            sh -c "go mod download && go build -ldflags=\"-X github.com/ouyangmland/V2bX-singbox/cmd.version=\${VERSION} -s -w\" -trimpath -o V2bX-linux-amd64 ."
+            sh /build/build-amd64.sh
           ls -lh V2bX-linux-amd64
       - name: Build arm64 (Alpine/musl)
         run: |
           VERSION="${{ steps.version.outputs.VERSION }}"
+          printf '#!/bin/sh\ngo mod download\ngo build -ldflags="-X github.com/ouyangmland/V2bX-singbox/cmd.version=${VERSION} -s -w" -trimpath -o V2bX-linux-arm64 .\n' > build-arm64.sh
           docker run --rm \
             -v "$PWD":/build \
             -w /build \
             -e CGO_ENABLED=0 \
             -e GOARCH=arm64 \
             -e GOEXPERIMENT=jsonv2 \
-            -e VERSION \
+            --env VERSION="$VERSION" \
             golang:1.25-alpine \
-            sh -c "go mod download && go build -ldflags=\"-X github.com/ouyangmland/V2bX-singbox/cmd.version=\${VERSION} -s -w\" -trimpath -o V2bX-linux-arm64 ."
+            sh /build/build-arm64.sh
           ls -lh V2bX-linux-arm64
       - name: Prepare amd64
         run: |
