@@ -61,7 +61,7 @@ jobs:
           cp example/*.json build_amd64/ 2>/dev/null || true
           cp V2bX-linux-amd64 build_amd64/V2bX
           cd build_amd64
-          zip -9vr "../V2bX-linux-amd64-${VERSION}.zip" . -x "*.DS_Store"
+          zip -9vr "../V2bX-linux-amd64.zip" . -x "*.DS_Store"
       - name: Prepare arm64
         run: |
           mkdir -p build_arm64
@@ -69,23 +69,21 @@ jobs:
           cp example/*.json build_arm64/ 2>/dev/null || true
           cp V2bX-linux-arm64 build_arm64/V2bX
           cd build_arm64
-          zip -9vr "../V2bX-linux-arm64-${VERSION}.zip" . -x "*.DS_Store"
+          zip -9vr "../V2bX-linux-arm64.zip" . -x "*.DS_Store"
       - name: Upload amd64
         uses: actions/upload-artifact@v4
         with:
           name: V2bX-linux-amd64
-          path: ./V2bX-linux-amd64-${VERSION}.zip
+          path: ./V2bX-linux-amd64.zip
       - name: Upload arm64
         uses: actions/upload-artifact@v4
         with:
           name: V2bX-linux-arm64
-          path: ./V2bX-linux-arm64-${VERSION}.zip
+          path: ./V2bX-linux-arm64.zip
       - name: Get tag for release
         id: get_tag
         run: |
           if [ "${{ github.event_name }}" = "release" ]; then
-            TAG="${{ github.ref_name }}"
-          elif [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
             TAG="${{ github.ref_name }}"
           else
             TAG="${{ github.event.client_payload.tag }}"
@@ -101,7 +99,7 @@ jobs:
           draft: false
           prerelease: false
           files: |
-            ./V2bX-linux-amd64-${VERSION}.zip
-            ./V2bX-linux-arm64-${VERSION}.zip
+            ./V2bX-linux-amd64.zip
+            ./V2bX-linux-arm64.zip
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
