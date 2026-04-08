@@ -32,8 +32,6 @@ jobs:
       matrix:
         goos: [linux]
         goarch: [amd64, arm64]
-          - goos: linux
-            goarch: s390x
       fail-fast: false
 
     runs-on: ubuntu-latest
