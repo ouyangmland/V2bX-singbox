@@ -78,12 +78,10 @@ jobs:
           cd build_assets
           zip -9vr "../$ARCHIVE.zip" . -x "*.DS_Store"
       - name: Upload
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: $ARCHIVE
           path: ./V2bX-${{ matrix.goos }}-${{ matrix.goarch }}${{ matrix.goarm }}.zip
-          retention-days: 5
-          if-no-content-found: warn
       - name: Release
         if: github.event_name == 'release'
         uses: svenstaro/upload-release-action@v2
