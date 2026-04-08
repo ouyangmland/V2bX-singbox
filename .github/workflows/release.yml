@@ -32,7 +32,9 @@ jobs:
       matrix:
         goos: [linux]
         goarch: [amd64, arm64]
-      fail-fast: false
+    concurrency:
+      group: ${{ github.workflow }}-${{ github.ref }}
+      cancel-in-progress: true
 
     runs-on: ubuntu-latest
     env:
