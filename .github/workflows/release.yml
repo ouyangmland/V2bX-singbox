@@ -39,7 +39,6 @@ jobs:
       - name: Get version
         id: version
         run: |
-          set -x
           EVENT="${{ github.event_name }}"
           PAYLOAD_TAG="${{ github.event.client_payload.tag }}"
           if [ "$EVENT" = "release" ]; then
