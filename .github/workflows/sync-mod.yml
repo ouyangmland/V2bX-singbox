@@ -103,7 +103,9 @@ jobs:
           go-version: '1.25.0'
 
       - name: Get deps
-        run: GOPROXY=https://proxy.golang.org,direct go mod download
+        run: |
+          GOPROXY=https://proxy.golang.org,direct go mod tidy
+          GOPROXY=https://proxy.golang.org,direct go mod download
 
       - name: Build amd64
         run: |
