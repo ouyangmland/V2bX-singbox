@@ -59,7 +59,7 @@ jobs:
       - name: Build amd64 (Alpine/musl)
         run: |
           VERSION="${{ steps.version.outputs.VERSION }}"
-          printf '#!/bin/sh\ngo mod download\ngo build -ldflags="-X github.com/ouyangmland/V2bX-singbox/cmd.version=${VERSION} -s -w" -trimpath -o V2bX-linux-amd64 .\n' > build-amd64.sh
+          printf '#!/bin/sh\ngo mod download\ngo build -ldflags="-X github.com/MoeclubM/V2bX/cmd.version=${VERSION} -s -w" -trimpath -o V2bX-linux-amd64 .\n' > build-amd64.sh
           docker run --rm \
             -v "$PWD":/build \
             -w /build \
@@ -73,7 +73,7 @@ jobs:
       - name: Build arm64 (Alpine/musl)
         run: |
           VERSION="${{ steps.version.outputs.VERSION }}"
-          printf '#!/bin/sh\ngo mod download\ngo build -ldflags="-X github.com/ouyangmland/V2bX-singbox/cmd.version=${VERSION} -s -w" -trimpath -o V2bX-linux-arm64 .\n' > build-arm64.sh
+          printf '#!/bin/sh\ngo mod download\ngo build -ldflags="-X github.com/MoeclubM/V2bX/cmd.version=${VERSION} -s -w" -trimpath -o V2bX-linux-arm64 .\n' > build-arm64.sh
           docker run --rm \
             -v "$PWD":/build \
             -w /build \
