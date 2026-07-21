@@ -118,7 +118,8 @@ jobs:
           fi
           echo "VERSION=$VERSION" >> $GITHUB_OUTPUT
           echo "FILENAME_AMD64=V2bX-linux-amd64.zip" >> $GITHUB_ENV
-          echo "FILENAME_ARM64=V2bX-linux-arm64.zip" >> $GITHUB_ENV
+          # 修改点1：将 ARM64 的文件名变量加上 -v8a 后缀
+          echo "FILENAME_ARM64=V2bX-linux-arm64-v8a.zip" >> $GITHUB_ENV
       - name: Build amd64 (Alpine/musl)
         run: |
           VERSION="${{ steps.version.outputs.VERSION }}"
@@ -136,7 +137,8 @@ jobs:
       - name: Build arm64 (Alpine/musl)
         run: |
           VERSION="${{ steps.version.outputs.VERSION }}"
-          printf '#!/bin/sh\ngo mod download\ngo build -ldflags="-X github.com/MoeclubM/V2bX/cmd.version=${VERSION} -s -w" -tags "sing with_quic with_grpc with_utls with_wireguard with_acme with_gvisor" -trimpath -o V2bX-linux-arm64 .\n' > build-arm64.sh
+          # 修改点2：编译输出的二进制文件名也改为 arm64-v8a
+          printf '#!/bin/sh\ngo mod download\ngo build -ldflags="-X github.com/MoeclubM/V2bX/cmd.version=${VERSION} -s -w" -tags "sing with_quic with_grpc with_utls with_wireguard with_acme with_gvisor" -trimpath -o V2bX-linux-arm64-v8a .\n' > build-arm64.sh
           docker run --rm \
             -v "$PWD":/build \
             -w /build \
@@ -146,7 +148,7 @@ jobs:
             --env VERSION="$VERSION" \
             golang:1.25-alpine \
             sh /build/build-arm64.sh
-          ls -lh V2bX-linux-arm64
+          ls -lh V2bX-linux-arm64-v8a
       - name: Prepare amd64
         run: |
           mkdir -p build_amd64
@@ -160,8 +162,10 @@ jobs:
           mkdir -p build_arm64
           cp README.md LICENSE build_arm64/ 2>/dev/null || true
           cp example/*.json build_arm64/ 2>/dev/null || true
-          cp V2bX-linux-arm64 build_arm64/V2bX
+          # 修改点3：复制刚才编译出的 arm64-v8a 二进制文件
+          cp V2bX-linux-arm64-v8a build_arm64/V2bX
           cd build_arm64
+          # 修改点4：打包输出的 zip 文件名改为 arm64-v8a.zip
           zip -9vr "../V2bX-linux-arm64-v8a.zip" . -x "*.DS_Store"
       - name: Upload amd64
         uses: actions/upload-artifact@v6
