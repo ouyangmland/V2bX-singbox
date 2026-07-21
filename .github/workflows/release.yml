@@ -162,7 +162,7 @@ jobs:
           cp example/*.json build_arm64/ 2>/dev/null || true
           cp V2bX-linux-arm64 build_arm64/V2bX
           cd build_arm64
-          zip -9vr "../V2bX-linux-arm64.zip" . -x "*.DS_Store"
+          zip -9vr "../V2bX-linux-arm64-v8a.zip" . -x "*.DS_Store"
       - name: Upload amd64
         uses: actions/upload-artifact@v6
         with:
